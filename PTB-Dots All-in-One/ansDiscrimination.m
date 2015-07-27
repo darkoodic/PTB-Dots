@@ -1,7 +1,9 @@
-%ANS Discrimination
-%Darko Odic
-%UBC Centre for Cognitive Development
-%Sep 3, 2014
+% PTB-Dots All-in-One (GitHub Version)
+% Darko Odic (http://odic.psych.ubc.ca)
+% University of British Columbia
+
+% Last Update: July/27/2015
+% Please read README.md before using. 
 
 function [] = ansDiscrimination()
     HideCursor;
