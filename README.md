@@ -1,7 +1,10 @@
 # PTB-Dots
 Darko Odic (http://odic.psych.ubc.ca)
+
 Department of Psychology
+
 University of British Columbia
+
 Psychtoolbox scripts used for generating, saving, and displaying approximate number dot displays.
 
 You can use these scripts in three ways, with each being a separate script:
