@@ -1,0 +1,12 @@
+ansDiscrimination config
+editDate    102414
+debug	off
+pracSN	999
+isi	500
+trialsPerBin	20
+color1rgb	[255,255,0]
+color2rgb	[0,0,255]
+color1string	yellow
+color2string	blue
+key1	z
+key2	m

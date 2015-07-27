@@ -1,0 +1,6 @@
+debug	off
+imagesPerBin	5
+color1rgb	[255,255,0]
+color2rgb	[0,0,255]
+color1string	yellow
+color2string	blue

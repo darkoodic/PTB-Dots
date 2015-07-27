@@ -1,0 +1,5 @@
+ansImageDisplay configFile
+dateEdited  102414
+debug	on
+pracSN	999
+isi	500
