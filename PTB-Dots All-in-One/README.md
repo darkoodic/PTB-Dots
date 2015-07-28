@@ -46,10 +46,8 @@ The script has four functions:
 ## If you need more than two sets of dots
 To increase the number of dot sets (e.g., make blue, yellow, and red dots) adjust the following:
 
-1. **Change config.txt**: you will need to add color3rgb and color3string as new lines (the order doesn't matter). Add key3 if needed.
+1. **Change config.txt**: you will need to add `color3rgb` and `color3string` as new lines (the order doesn't matter). Add `key3` if needed. You will need to add new numbers to the `numberArray` (after a comma, before the semicolon). 
 
 2. **Change loading of config**: you will need to create/load new variables called `drawRect3`, `color3rgb`, and `color3string`. Simply copy and paste existing functions and adjust to match the name in the config file.
 
-3. **Change `numberArray`**: you will need to add a third number before each semicolon (;).
-
-4. **Change `drawDots`**: you will need add `trialNumber3` to the third input line, `drawRect3` to the fourth, `color3rgb` to the fifth, and `trialArea3` to the sixth, Make sure these additions stay as array inputs. The `drawDots` function will automatically generate the third set if these inputs are correct. 
+3. **Change `drawDots`**: you will need add `trialNumber3` to the fourth input line, `drawRect3` to the fifth, `color3rgb` to the sixth, and `trialArea3` to the seventh, Make sure these additions stay as array inputs. The `drawDots` function will automatically generate the third set if these inputs are correct. 
