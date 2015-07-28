@@ -5,7 +5,7 @@
 % Last Update: July/27/2015
 % Please read README.md before using. 
 
-function [] = ansDiscrimination()
+function [] = ptbdotsaio()
     HideCursor;
     clear all;
     warning off;
@@ -18,13 +18,15 @@ function [] = ansDiscrimination()
     inputCells = textscan(inputFile,'%s\t %s\n');
 
     %% OPEN SCREEN
+    % Note that both debug being on and off turns off Sync Tests (due to Mac issues)
+    % If it doesn't cause problems on your machine, I would turn Sync Tests back on. 
     if(strcmp(inputCells{2}{strcmp('debug',inputCells{1})},'on'))
         ListenChar(0);
         sub = input('Subject number:   ', 's');
         isi = str2num(inputCells{2}{strcmp('isi',inputCells{1})});    
         trialsPerBin = str2num(inputCells{2}{strcmp('trialsPerBin',inputCells{1})});
         Screen('Preference','SkipSyncTests',1);
-        [w,rect]=Screen('OpenWindow',max(Screen('screens')),[127 127 127],[0 0 800 600]);
+        [w,rect]=Screen('OpenWindow',max(Screen('screens')),[127 127 127],[0 0 800 600]); %windowed screen
     else
         prompt = {'Subject Number:', 'ISI', 'TrialsPerBin'};
         defaults = {'999', inputCells{2}{strcmp('isi',inputCells{1})}, inputCells{2}{strcmp('trialsPerBin',inputCells{1})}};
@@ -32,7 +34,7 @@ function [] = ansDiscrimination()
         [sub, isi, trialsPerBin] = deal(answer{:});
         isi = str2num(isi);
         trialsPerBin = str2num(trialsPerBin);
-        Screen('Preference','SkipSyncTests',1);
+        Screen('Preference','SkipSyncTests',1); % delete this line if sync tests work. 
         [w,rect]=Screen('OpenWindow',max(Screen('screens')),[127 127 127]);
         ListenChar(2);
     end
@@ -41,7 +43,7 @@ function [] = ansDiscrimination()
     Screen('BlendFunction', w, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     %% MAKE DATA FILE    
-    fn = strcat('Data/ANSDiscrimination', '_', datestr(now, 'mmdd'),'_', sub,'.xls');
+    fn = strcat('Data/ANSDiscrimination', '_', datestr(now, 'mmdd'),'_', sub,'.xls'); %make sure /Data/ folder exists. 
     fid = fopen(fn, 'a+');
     sub = str2num(sub); %#ok<ST2NM>
     fprintf(fid, '%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\n', ...
@@ -64,23 +66,30 @@ function [] = ansDiscrimination()
     fclose(fid);
     
     %% DOT & TRIAL PROPERTIES
-    drawRect = [rect(3)*0.15, rect(4)*0.15, rect(3)*0.85, rect(4)*0.85];
-    defaultArea = (drawRect(3)*drawRect(4))*0.02;
+    drawRect1 = [rect(3)*0.15, rect(4)*0.15, rect(3)*0.85, rect(4)*0.85];
+    drawRect2 = [rect(3)*0.15, rect(4)*0.15, rect(3)*0.85, rect(4)*0.85];
     color1rgb = str2num(inputCells{2}{strcmp('color1rgb',inputCells{1})});
     color2rgb = str2num(inputCells{2}{strcmp('color2rgb',inputCells{1})});
     color1string = inputCells{2}{strcmp('color1string',inputCells{1})};
     color2string = inputCells{2}{strcmp('color2string',inputCells{1})};
     key1 = inputCells{2}{strcmp('key1',inputCells{1})};
     key2 = inputCells{2}{strcmp('key2',inputCells{1})};
+    allowedVariability = inputCells{2}{strcmp('allowedVariability',inputCells{1})}; %in percent +/- from default
+    
+    %the default size of the dot set is determined as % of the total screen
+    %size; this allows to scale nicely if you change the draw rectangle or
+    %if you do not run at full screen. 
+    percentScreen = str2num(inputCells{2}{strcmp('defaultSizePercentScreen',inputCells{1})});
+    defaultArea = (drawRect1(3)*drawRect1(4))*(percentScreen/100); 
     
     %TRIAL ARRAY
     if(sub == str2num(inputCells{2}{strcmp('pracSN',inputCells{1})}))
         trialsPerBin = 2;
     end
     %2.0; 1.5; 1.2; 1.1
-    numberArray = [20,10; 10,20; 18,12; 12,18; 24,20; 20,24; 22,10; 10,22];    
-    numberTimesArea1 = horzcat(numberArray, repmat(1,[length(numberArray),1])); %Area = 1, Congruent
-    numberTimesArea2 = horzcat(numberArray, repmat(2,[length(numberArray),1])); %Area = 2, InCongruent
+    numberArray = str2num(inputCells{2}{strcmp('numberArray',inputCells{1})});
+    numberTimesArea1 = horzcat(numberArray, repmat(1,[length(numberArray),1])); %Area = 1, Congruent (area and number match)
+    numberTimesArea2 = horzcat(numberArray, repmat(2,[length(numberArray),1])); %Area = 2, InCongruent (area and number mismatch)
     
     trialArray = repmat(vertcat(numberTimesArea1,numberTimesArea2),[trialsPerBin,1]);
     totalTrials = length(trialArray);
@@ -88,7 +97,8 @@ function [] = ansDiscrimination()
 
     Priority(9);
     timeStart = GetSecs;
-    %% Run Trials
+
+    %% RUN TRIALS
     for currentTrial = 1:totalTrials
         %Setup individual trial
         trialNumber1= shuffledArray(currentTrial,1,:);
@@ -126,9 +136,10 @@ function [] = ansDiscrimination()
         
         didIt = drawDots(...
             w,... %screen
-            10,... %minDistance
+            10,... %minDistance in pixels
+            allowedVariability,... %allowed pixel variability
             [trialNumber1,trialNumber2],... %numberSet
-            [drawRect;drawRect],... %drawRectSet, if identical then dots are intermixed
+            [drawRect1;drawRect2],... %drawRectSet, if identical then dots are intermixed
             [color1rgb; color2rgb],... %colorSet
             [trialArea1, trialArea2]); %pixelsSet   
         Screen('Flip',w);
@@ -157,14 +168,14 @@ function [] = ansDiscrimination()
             correct = 100;
         elseif((buttonPressed==KbName(key2))&&(trialNumber2>trialNumber1))  
             correct = 100;
-        elseif(buttonPressed==KbName('q'))
+        elseif(buttonPressed==KbName('q')) %the hard-coded quit button if you want to stop the experiment
             break;
         end
 
         output{1} = sub;
         output{2} = didIt;
         output{3} = currentTrial;
-        output{4} = (GetSecs-timeStart)/60;
+        output{4} = (GetSecs-timeStart)/60; %timestamp
         output{5} = isi;
         output{6} = color1string;
         output{7} = color2string;
@@ -216,7 +227,7 @@ function [] = writeData(output,file)
     fclose(fid);
 end
 
-function[didIt] = drawDots(w, minDistance, numberSet, drawRectSet, colorSet, pixelsSet)
+function[didIt] = drawDots(w, minDistance, allowedVariability, numberSet, drawRectSet, colorSet, pixelsSet)
     %Task #1: initialize all the variables, including size of the screen we
     %are drawing to, the variability in the size of the dots, their
     %colours, etc.
@@ -236,8 +247,8 @@ function[didIt] = drawDots(w, minDistance, numberSet, drawRectSet, colorSet, pix
     %the number of dots can't fit on the screen) we need to have break
     %procedures that time out the loops and effectively stop the function
     %from running; this is why the ditIt variable is returned. 
-    allowedVariability = 40;
-    errorThreshold = pixelsSet*0.05;
+    
+    errorThreshold = pixelsSet*0.05; %the % within which the total area doesn't have to exactly match specified
     defaultArea = pixelsSet./numberSet;
     defaultRadius = sqrt(defaultArea./pi);       
     
@@ -280,7 +291,6 @@ function[didIt] = drawDots(w, minDistance, numberSet, drawRectSet, colorSet, pix
             maxX = drawRectSet(currentSet,3);
             maxY = drawRectSet(currentSet,4);
             minD = minDistance;
-           % break;
             
             dotSetX1(currentSet,1) = 0;
             dotSetX2(currentSet,1) = 0;
