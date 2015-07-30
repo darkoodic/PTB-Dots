@@ -1,188 +1,160 @@
-%ANS Image Display
-%Darko Odic
-%UBC Centre for Cognitive Development
-%Sep 3, 2014
-function [] = ansImageDisplay()
+% PTB-Dots Generator (GitHub Version)
+% Darko Odic (http://odic.psych.ubc.ca)
+% University of British Columbia
+
+% Last Update: July/30/2015
+% Please read README.md before using. 
+% You require a /OutputImages/ folder for this script to work.
+
+% Note: I have previously had issues with the 'GetImage' function working
+% properly on Windows/PC (the function just captured blank screen, as if it
+% triggered too late). If you are having issues with this script, please
+% try using the script on a Mac. 
+function [] = ptbdotsgen()
     HideCursor;
     clear all;
     warning off;
     rand('twister',sum(100*clock));
     AssertOpenGL;
-    InitializePsychSound;
     KbName('UnifyKeyNames');
     
     %% OPEN CONFIG FILE
     inputFile = fopen('config.txt');
     inputCells = textscan(inputFile,'%s\t %s\n');
 
-    %% OPEN SCREEN
-    if(strcmp(inputCells{2}{strcmp('debug',inputCells{1})},'on'))
-        ListenChar(0);
-        sub = input('Subject number:   ', 's');
-        isi = str2num(inputCells{2}{strcmp('isi',inputCells{1})});    
-        trialsPerBin = str2num(inputCells{2}{strcmp('trialsPerBin',inputCells{1})});
-        Screen('Preference','SkipSyncTests',1);
-        [w,rect]=Screen('OpenWindow',max(Screen('screens')),[127 127 127],[0 0 800 600]);
-    else
-        prompt = {'Subject Number:', 'ISI', 'TrialsPerBin'};
-        defaults = {'999', inputCells{2}{strcmp('isi',inputCells{1})}, inputCells{2}{strcmp('trialsPerBin',inputCells{1})}};
-        answer = inputdlg(prompt, 'ANS Discrimination', 1, defaults);
-        [sub, isi, trialsPerBin] = deal(answer{:});
-        isi = str2num(isi);
-        trialsPerBin = str2num(trialsPerBin);
-        Screen('Preference','SkipSyncTests',1);
-        [w,rect]=Screen('OpenWindow',max(Screen('screens')),[127 127 127]);
-        ListenChar(2);
-    end
-    Screen('TextFont', w, 'Helvetica');
-    Screen('TextSize', w, 24);
-    Screen('BlendFunction', w, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
-    %% MAKE DATA FILE  
-    fn = strcat('Data/ANSDiscrimination', '_', datestr(now, 'mmdd'),'_', sub,'.xls');
-
+    %% MAKE OUTPUT FILE (this file is critical for the ptbdotsdisplay script)
+    fn = strcat('OutputImages/imageStats.txt');
     fid = fopen(fn, 'a+');
-    sub = str2num(sub); %#ok<ST2NM>
-    fprintf(fid, '%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\n', ...
-        'SubNum',...
-        'TrialNum',...
-        'TimeStamp',...
-        'ISI',...
+    fprintf(fid, '%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\n', ...
         'ImageNum',...
-        'ImageShown',...
+        'DidIt',...
+        'ImageName',...
+        'Color1String',...
+        'Color2String',...
         'Number1',...
         'Number2',...
         'Ratio',...
         'Area1',...
         'Area2',...
-        'AreaCongruency',...
-        'KeyPressed',...
-        'RT',...
-        'Correct');
+        'AreaCongruency');
     fclose(fid);
-
-    inputFile = fopen('config.txt');
-    inputCells = textscan(inputFile,'%s\t %s\n');
-
-    imageFile = fopen('InputImages/imageStats.txt');
-    trialArray=textscan(imageFile,'%d\t %d\t %s\t %s\t %s\t %d\t %d\t %f\t %f\t %f\t %d\n', 'Headerlines',1);
-    %trialArray{:,1} imageNumbers
-    %trialArray{:,2} didIt
-    %trialArray{:,3} imageNames (need to append folder and .png)
-    %trialArray{:,4} color1string
-    %trialArray{:,5} color2string
-    %trialArray{:,6} trialNumber1
-    %trialArray{:,7} trialNumber2
-    %trialArray{:,8} ratio
-    %trialArray{:,9} area1
-    %trialArray{:,10} area2
-    %trialArray{:,11} areaCongruency
-    trialOrder = randperm(length(trialArray{:,1}));
     
-    %OPEN SCREEN
+    %% OPEN SCREEN
+    % Note that both debug being on and off turns off Sync Tests (due to Mac issues)
+    % If it doesn't cause problems on your machine, I would turn Sync Tests back on. 
     if(strcmp(inputCells{2}{strcmp('debug',inputCells{1})},'on'))
         Screen('Preference','SkipSyncTests',1);
         [w,rect]=Screen('OpenWindow',max(Screen('screens')),[127 127 127],[0 0 800 600]);
-        ListenChar(0);
+        trialsPerBin = 2;
     else
+        Screen('Preference','SkipSyncTests',1);
         [w,rect]=Screen('OpenWindow',max(Screen('screens')),[127 127 127]);
-        ListenChar(2);
+        trialsPerBin = str2num(inputCells{2}{strcmp('imagesPerBin',inputCells{1})});
     end
     Screen('Preference', 'TextRenderer', 0);
     Screen(w,'TextSize',30);
     Screen(w,'TextFont','Helvetica');
     Screen('BlendFunction', w, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
-    %TRIAL ARRAY
-    if(sub == str2num(inputCells{2}{strcmp('pracSN',inputCells{1})}))
-        totalTrials = 5;
-    end
+    %% DOT & TRIAL PROPERTIES
+    drawRect1 = [rect(3)*0.15, rect(4)*0.15, rect(3)*0.85, rect(4)*0.85];
+    drawRect2 = [rect(3)*0.15, rect(4)*0.15, rect(3)*0.85, rect(4)*0.85];
+    color1rgb = str2num(inputCells{2}{strcmp('color1rgb',inputCells{1})});
+    color2rgb = str2num(inputCells{2}{strcmp('color2rgb',inputCells{1})});
+    color1string = inputCells{2}{strcmp('color1string',inputCells{1})};
+    color2string = inputCells{2}{strcmp('color2string',inputCells{1})};
+    allowedVariability = inputCells{2}{strcmp('allowedVariability',inputCells{1})}; %in percent +/- from default
     
+    %the default size of the dot set is determined as % of the total screen
+    %size; this allows to scale nicely if you change the draw rectangle or
+    %if you do not run at full screen. 
+    percentScreen = str2num(inputCells{2}{strcmp('defaultSizePercentScreen',inputCells{1})});
+    defaultArea = (drawRect1(3)*drawRect1(4))*(percentScreen/100); 
+    
+    %NUMBER OF IMAGES ARRAY
+    %2.0; 1.50; 1.20; 1.11; 1.06
+    numberArray = str2num(inputCells{2}{strcmp('numberArray',inputCells{1})});
+    numberTimesArea1 = horzcat(numberArray, repmat(1,[length(numberArray),1])); %Area = 1, Congruent
+    numberTimesArea2 = horzcat(numberArray, repmat(2,[length(numberArray),1])); %Area = 2, InCongruent
+    
+    imagesArray = repmat(vertcat(numberTimesArea1,numberTimesArea2),[trialsPerBin,1]);
+    totalImages = length(imagesArray);
+  
     Priority(9);
-    timeStart = GetSecs;
-    %% Run Trials
-    for currentTrial = 1:totalTrials
+    %% RUN TRIALS
+    for currentTrial = 1:totalImages
         %Setup individual trial
-        imageID = strcat('InputImages/',trialArray{:,3}{trialOrder(currentTrial)},'.png'); 
-        [im , ~, ~] = imread(imageID);
-        picIndex = Screen('MakeTexture', w, im);             
-              
-        RestrictKeysForKbCheck([KbName('Space')]);
-        DrawFormattedText(w,['Are more of the dots ',trialArray{:,4}{trialOrder(currentTrial)},' (z) or ',trialArray{:,5}{trialOrder(currentTrial)},' (m)?'],'center','center',0);
-        Screen('Flip',w);
-        KbWait();
-
-        Screen('DrawText',w,'+',rect(3)/2,rect(4)/2,0,0,0);
-        Screen('Flip',w);
-        WaitSecs(250/1000);
-        Screen('Flip',w);
+        trialNumber1= imagesArray(currentTrial,1,:);
+        trialNumber2 = imagesArray(currentTrial,2,:);
+        trialRatio = max(trialNumber1/trialNumber2, trialNumber2/trialNumber1);
         
-        [y,x,~] = size(im); %get size of image
-        Screen('DrawTexture', w, picIndex, [0 0 x y], rect);   
-        Screen('Flip',w);
-       
-        rt=0; %#ok<NASGU>
-        kdown = 0;
-        keyCode = 0;
-        RestrictKeysForKbCheck([KbName('z') KbName('m') KbName('q')]);
-        T1 = GetSecs;
-        while((kdown == 0))
-            [keyIsDown, ~, keyCode] = KbCheck;
-            kdown=keyIsDown;
-            T2 = GetSecs;
-            rt = (T2-T1)*1000;
-            if(rt >= isi)
-                Screen('Flip',w);
+        trialArea = imagesArray(currentTrial,3,:);
+        if(trialArea == 1) %Congruent
+            if(trialNumber1>trialNumber2)
+                trialArea1 = defaultArea;
+                trialArea2 = defaultArea*(1/trialRatio);
+            else
+                trialArea1 = defaultArea*(1/trialRatio);
+                trialArea2 = defaultArea;
+            end
+        else
+            if(trialNumber1>trialNumber2)
+                trialArea1 = defaultArea*(1/trialRatio);
+                trialArea2 = defaultArea;
+            else
+                trialArea1 = defaultArea;
+                trialArea2 = defaultArea*(1/trialRatio);
             end
         end
-        T2 = GetSecs;
-        Screen('Flip',w);
-        buttonPressed = find(keyCode);
-        rt = (T2-T1)*1000;
- 
-        correct = 0;
-        if((buttonPressed==KbName('z'))&&(trialArray{:,6}(trialOrder(currentTrial))>trialArray{:,7}(trialOrder(currentTrial))))  
-            correct = 100;
-        elseif((buttonPressed==KbName('m'))&&(trialArray{:,7}(trialOrder(currentTrial))>trialArray{:,6}(trialOrder(currentTrial))))  
-            correct = 100;
-        elseif(buttonPressed==KbName('q'))
-            break;
+                     
+        didIt = drawDots(...
+            w,... %screen
+            10,... %minDistance in pixels
+            allowedVariability,... %allowed pixel variability
+            [trialNumber1,trialNumber2],... %numberSet
+            [drawRect1;drawRect2],... %drawRectSet, if identical then dots are intermixed
+            [color1rgb; color2rgb],... %colorSet
+            [trialArea1, trialArea2]); %pixelsSet   
+       Screen('Flip',w);
+        
+        if(didIt == 1)
+            % Save Display as Image
+            % Note: .png will give you higher quality than .jpg
+            % The filename doesn't have to be this descriptive, but it is
+            % important that it doesn't lead to repeats
+            imageArray = Screen('GetImage',w,rect);
+            filename = strcat('ansGen-',num2str(trialNumber1),'-',num2str(trialNumber2),'-',num2str(trialArea),'-',num2str(currentTrial));
+            filepath = strcat('OutputImages/',filename,'.png');
+            imwrite(imageArray, filepath);
         end
-    
-        output{1} = sub;
-        output{2} = currentTrial;
-        output{3} = (GetSecs-timeStart)/60;
-        output{4} = isi;
-        output{5} = trialArray{:,1}(trialOrder(currentTrial));
-        output{6} = trialArray{:,3}{trialOrder(currentTrial)};
-        output{7} = trialArray{:,6}(trialOrder(currentTrial));
-        output{8} = trialArray{:,7}(trialOrder(currentTrial));
-        output{9} = trialArray{:,8}(trialOrder(currentTrial));
-        output{10} = trialArray{:,9}(trialOrder(currentTrial));
-        output{11} = trialArray{:,10}(trialOrder(currentTrial));
-        output{12} = trialArray{:,11}(trialOrder(currentTrial));
-        output{13} = KbName(buttonPressed);
-        output{14} = rt;
-        output{15} = correct;
- 
+        
+        output{1} = currentTrial;
+        output{2} = didIt;
+        output{3} = filename;
+        output{4} = color1string;
+        output{5} = color2string;
+        output{6} = trialNumber1;
+        output{7} = trialNumber2;
+        output{8} = trialRatio;
+        output{9} = trialArea1;
+        output{10} = trialArea2;
+        output{11} = trialArea;     
         writeData(output,fn);
     end
-    Priority(0);
+
     %% Clean up
     Screen('Flip',w);
-    DrawFormattedText(w,'You are done this part of the experiment! Please alert your experimenter.', 'center','center',0);
+    DrawFormattedText(w,'All done.', 'center','center',0);
     Screen('Flip',w);
-    WaitSecs(2);
-    ListenChar(0);
+    WaitSecs(1);
     ShowCursor;
     Screen('CloseAll');
 end
 
 %DATAOUT FUNCTION
 function [] = writeData(output,file)
-
     fid = fopen(file, 'a+');
-    fprintf(fid, '%4d\t %4d\t %4d\t %4d\t %4d\t %4s\t %4d\t %4d\t %4f\t %4d\t %4d\t %4d\t %4s\t %4f\t %4d\n', ...
+    fprintf(fid, '%4d\t %4d\t %4s\t %4s\t %4s\t %4d\t %4d\t %4f\t %4d\t %4d\t %4d\n', ...
         output{1},...
         output{2},...
         output{3},...
@@ -193,15 +165,11 @@ function [] = writeData(output,file)
         output{8},...
         output{9},...
         output{10},...
-        output{11},...
-        output{12},...
-        output{13},...
-        output{14},...
-        output{15});
+        output{11});
     fclose(fid);
 end
 
-function[didIt] = drawDots(w, minDistance, numberSet, drawRectSet, colorSet, pixelsSet)
+function[didIt] = drawDots(w, minDistance, allowedVariability, numberSet, drawRectSet, colorSet, pixelsSet)
     %Task #1: initialize all the variables, including size of the screen we
     %are drawing to, the variability in the size of the dots, their
     %colours, etc.
@@ -221,8 +189,8 @@ function[didIt] = drawDots(w, minDistance, numberSet, drawRectSet, colorSet, pix
     %the number of dots can't fit on the screen) we need to have break
     %procedures that time out the loops and effectively stop the function
     %from running; this is why the ditIt variable is returned. 
-    allowedVariability = 40;
-    errorThreshold = pixelsSet*0.05;
+    
+    errorThreshold = pixelsSet*0.05; %the % within which the total area doesn't have to exactly match specified
     defaultArea = pixelsSet./numberSet;
     defaultRadius = sqrt(defaultArea./pi);       
     
@@ -265,7 +233,6 @@ function[didIt] = drawDots(w, minDistance, numberSet, drawRectSet, colorSet, pix
             maxX = drawRectSet(currentSet,3);
             maxY = drawRectSet(currentSet,4);
             minD = minDistance;
-           % break;
             
             dotSetX1(currentSet,1) = 0;
             dotSetX2(currentSet,1) = 0;
@@ -357,7 +324,7 @@ function[didIt] = drawDots(w, minDistance, numberSet, drawRectSet, colorSet, pix
             end;
         end%currentSet for loop
     end%draw dot function
-end%function
+end%
 
 function[overlapping] = checkOverlap(checkX, checkY,x1, y1, x2, y2)
     if((checkX>x1)&&(checkX<x2)&&(checkY>y1)&&(checkY<y2))

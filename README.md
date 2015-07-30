@@ -23,4 +23,3 @@ There are three different versions of the script:
 
 ## License
 Code released under the MIT license.
-

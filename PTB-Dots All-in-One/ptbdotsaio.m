@@ -2,7 +2,7 @@
 % Darko Odic (http://odic.psych.ubc.ca)
 % University of British Columbia
 
-% Last Update: July/27/2015
+% Last Update: July/30/2015
 % Please read README.md before using. 
 
 function [] = ptbdotsaio()
@@ -30,7 +30,7 @@ function [] = ptbdotsaio()
     else
         prompt = {'Subject Number:', 'ISI', 'TrialsPerBin'};
         defaults = {'999', inputCells{2}{strcmp('isi',inputCells{1})}, inputCells{2}{strcmp('trialsPerBin',inputCells{1})}};
-        answer = inputdlg(prompt, 'ANS Discrimination', 1, defaults);
+        answer = inputdlg(prompt, 'PTB-Dots AIO', 1, defaults);
         [sub, isi, trialsPerBin] = deal(answer{:});
         isi = str2num(isi);
         trialsPerBin = str2num(trialsPerBin);
@@ -43,7 +43,7 @@ function [] = ptbdotsaio()
     Screen('BlendFunction', w, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     %% MAKE DATA FILE    
-    fn = strcat('Data/ANSDiscrimination', '_', datestr(now, 'mmdd'),'_', sub,'.xls'); %make sure /Data/ folder exists. 
+    fn = strcat('Data/PTBDotsAIO', '_', datestr(now, 'mmdd'),'_', sub,'.xls'); %make sure /Data/ folder exists. 
     fid = fopen(fn, 'a+');
     sub = str2num(sub); %#ok<ST2NM>
     fprintf(fid, '%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\n', ...
@@ -86,7 +86,6 @@ function [] = ptbdotsaio()
     if(sub == str2num(inputCells{2}{strcmp('pracSN',inputCells{1})}))
         trialsPerBin = 2;
     end
-    %2.0; 1.5; 1.2; 1.1
     numberArray = str2num(inputCells{2}{strcmp('numberArray',inputCells{1})});
     numberTimesArea1 = horzcat(numberArray, repmat(1,[length(numberArray),1])); %Area = 1, Congruent (area and number match)
     numberTimesArea2 = horzcat(numberArray, repmat(2,[length(numberArray),1])); %Area = 2, InCongruent (area and number mismatch)
@@ -95,10 +94,31 @@ function [] = ptbdotsaio()
     totalTrials = length(trialArray);
     shuffledArray = trialArray(randperm(size(trialArray,1)),:);
 
+    %% SHOW INSTRUCTIONS
+    % To make your own, go to the /Instructions/ folder, edit the Powerpoint file and save as image. 
+    if(strcmp(inputCells{2}{strcmp('debug',inputCells{1})},'off'))
+        imageID = strcat('Instructions/instructions1.png'); 
+        [im , ~, ~] = imread(imageID);
+        picIndex = Screen('MakeTexture', w, im);             
+        [y,x,~] = size(im); %get size of image
+        Screen('DrawTexture', w, picIndex, [0 0 x y], rect);   
+        Screen('Flip',w);
+        RestrictKeysForKbCheck([KbName('c')]); %hard-coded for participant to not quickly advance
+        KbWait();
+
+        imageID = strcat('Instructions/instructions2.png'); 
+        [im , ~, ~] = imread(imageID);
+        picIndex = Screen('MakeTexture', w, im);             
+        [y,x,~] = size(im); %get size of image
+        Screen('DrawTexture', w, picIndex, [0 0 x y], rect);   
+        Screen('Flip',w);
+        RestrictKeysForKbCheck([KbName('b')]); %different from first button so no quick advance.
+        KbWait();
+    end
+   
+    %% RUN TRIALS
     Priority(9);
     timeStart = GetSecs;
-
-    %% RUN TRIALS
     for currentTrial = 1:totalTrials
         %Setup individual trial
         trialNumber1= shuffledArray(currentTrial,1,:);

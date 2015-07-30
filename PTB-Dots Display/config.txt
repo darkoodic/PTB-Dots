@@ -1,5 +1,7 @@
-ansImageDisplay configFile
-dateEdited  102414
-debug	on
+ptbdotsdisplay configFile
+dateEdited  300715
+debug	off
 pracSN	999
 isi	500
+key1    z
+key2    m
