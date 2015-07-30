@@ -1,5 +1,5 @@
-ansDiscrimination config
-editDate    102414
+ptbdotsaoi config
+editDate    300715
 debug	off
 pracSN	999
 isi	500
