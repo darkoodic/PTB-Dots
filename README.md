@@ -1,12 +1,12 @@
 # PTB-Dots
-Psychtoolbox scripts used for generating, saving, and displaying approximate number dot displays.
+Psychtoolbox scripts used for generating, saving, and displaying approximate number system (ANS) dot displays. 
 
 ## Created By
 Darko Odic (http://odic.psych.ubc.ca) <br />
 Department of Psychology <br />
 University of British Columbia <br />
 
-We welcome contributions and revisions to this code, as it could definitely be optimized further! If interested, fork, change, send pull request. If you don't like git, clone/download, revise, then send me an email an I can upload (and give credit).
+We welcome contributions and revisions to this code, as it could definitely be optimized further! If interested, fork, change, send pull request. If you don't like git, clone/download, revise, then send me an email.
 
 ## Quick Start
 
