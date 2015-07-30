@@ -6,6 +6,8 @@ Darko Odic (http://odic.psych.ubc.ca) <br />
 Department of Psychology <br />
 University of British Columbia <br />
 
+We welcome contributions and revisions to this code, as it could definitely be optimized further! If interested, fork, change, send pull request. If you don't like git, clone/download, revise, then send me an email an I can upload (and give credit).
+
 ## Quick Start
 
 1. Make sure you have downloaded the latest version of <a href="http://www.mathworks.com/products/matlab/">MATLAB</a> and <a href="http://psychtoolbox.org/">Psychtoolbox</a>. These scripts were built and tested on Psychtoolbox-3.0.11, but should work fine with later versions, as well. 
