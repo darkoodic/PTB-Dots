@@ -2,4 +2,3 @@
 - [ ] README for Generator
 - [ ] Adjust generator code for config.txt
 - [ ] Adjust display code for config.txt
-- 
