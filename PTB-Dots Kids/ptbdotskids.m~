@@ -67,9 +67,6 @@ function [] = ptbdotskids()
     fclose(fid);
 
     %% DOT & TRIAL PROPERTIES
-    % With kids we have to spatially separate the dots for extra cues
-    % and in case they are colour-blind. This means we cannot have more
-    % than two colours.
     leftDrawRect = [rect(3)*0.10, rect(4)*0.15, rect(3)*0.40, rect(4)*0.85];
     rightDrawRect = [rect(3)*0.60, rect(4)*0.15, rect(3)*0.90, rect(4)*0.85];
     leftFrameRect = [rect(3)*0.05, rect(4)*0.10, rect(3)*0.45, rect(4)*0.90];
@@ -78,32 +75,22 @@ function [] = ptbdotskids()
     color2rgb = str2num(inputCells{2}{strcmp('color2rgb',inputCells{1})});
     color1string = inputCells{2}{strcmp('color1string',inputCells{1})};
     color2string = inputCells{2}{strcmp('color2string',inputCells{1})};
-    key1 = inputCells{2}{strcmp('key1',inputCells{1})};
-    key2 = inputCells{2}{strcmp('key2',inputCells{1})};
-    allowedVariability = inputCells{2}{strcmp('allowedVariability',inputCells{1})}; %in percent +/- from default
-   
-    %Make sure ISI is nice and long for young kids
-    isi = str2num(inputCells{2}{strcmp('isi',inputCells{1})});    
     
-    %Load in two kid-friendly characters so kids don't have to say colours.
-    %Default is spongebob and smurf, you can also load big bird and grover
-    %or include your own (must have transparent back and specify file in config.txt). 
+    %Load in two kid-friendly characters so kids don't have to 
     character1 = inputCells{2}{strcmp('character1',inputCells{1})};
     character2 = inputCells{2}{strcmp('character2',inputCells{1})};
-    
-    %Optional freeze first trial for explanation
     freezeFirst = inputCells{2}{strcmp('freezeFirstTrial',inputCells{1})};
-    
-    %Optional progress bar so you know how close to end. This is helpful
-    %for being able to motivate the child by showing them how close they
-    %are to being done. 
+    isi = str2num(inputCells{2}{strcmp('isi',inputCells{1})});    
+    key1 = inputCells{2}{strcmp('key1',inputCells{1})};
+    key2 = inputCells{2}{strcmp('key2',inputCells{1})};
     progressBarRect = [rect(3)*0.45, rect(4)*0.95, rect(3)*0.55, rect(4)*0.98];
-    
+    allowedVariability = inputCells{2}{strcmp('allowedVariability',inputCells{1})}; %in percent +/- from default
+   
     %the default size of the dot set is determined as % of the total screen
     %size; this allows to scale nicely if you change the draw rectangle or
     %if you do not run at full screen. 
     percentScreen = str2num(inputCells{2}{strcmp('defaultSizePercentScreen',inputCells{1})});
-    defaultArea = (rect(3)*rect(4))*(percentScreen/100); 
+    defaultArea = (drawRect1(3)*drawRect1(4))*(percentScreen/100); 
        
     %CARTOON TEXTURES
     leftCharacter = strcat('Characters/',character1,'.png'); 
@@ -289,11 +276,7 @@ function [] = ptbdotskids()
             break;
         end
             
-        %% PLAY FEEDBACK
-        % Optional but will read in sounds from /Sounds/ directory.
-        % There are 10 variations on Correct and 2 on Wrong in order to
-        % keep things interesting for the child (and with the expectation
-        % that they will get most trials correct).
+        %PLAY FEEDBACK
         if(strcmp(feedback,'on'))
             if(correct == 100);
                 [sound, freq] = wavread(['Sounds/Correct',num2str(randsample(10,1)),'.wav']);
@@ -315,7 +298,7 @@ function [] = ptbdotskids()
         output{1} = sub;
         output{2} = didIt;
         output{3} = currentTrial;
-        output{4} = (GetSecs-timeStart)/60; %timestamp
+        output{4} = (GetSecs-timeStart)/60;
         output{5} = isi;
         output{6} = feedback;
         output{7} = character1;
@@ -338,7 +321,7 @@ function [] = ptbdotskids()
 
     %% CLEAN UP
     if(strcmp(feedback,'on'))
-        PsychPortAudio('Close', pahandle); %delete audio
+        PsychPortAudio('Close', pahandle);
     end
     Screen('Flip',w);
     DrawFormattedText(w,'Yay! All Done!', 'center','center',0);
