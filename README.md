@@ -25,5 +25,12 @@ There are four different versions of the script:
 ## Using this script for kids?
 We are currently in the process of making a fourth script type that can be easily used with children. Stay tuned.
 
+## Using this script for kids?
+We are currently in the process of making a fourth script type that can be easily used with children. Stay tuned.
+
 ## License
+<<<<<<< HEAD
 Code released under the <a href="http://opensource.org/licenses/MIT">MIT license</a>.
+=======
+Code released under the MIT license.
+>>>>>>> master
