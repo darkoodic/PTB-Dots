@@ -1,7 +1,7 @@
 #PTB-Dots Kids (ptbdotskids.m)
 
 Darko Odic (http://odic.psych.ubc.ca) <br />
-Last Edit: 02/August/2015 <br />
+Last Edit: Sep/6/2015 <br />
 
 This Psychtoolbox script is used to generate random dot stimuli for Approximate Number System experiments *used with children* aged 3 - 10. It works similar to the PTB-Dots AOI script, but provides a series of functions that make it easier to display and work with children, including kid-friendly characters, a progress bar, kid-friendly feedback, etc. 
 
@@ -10,13 +10,14 @@ If you are interested in running simple ANS experiments with children and are a 
 
 ## Quick Overview
 To run the script as an experiment, you need to adjust the config.txt file, including:
+
   * `debug` ("on" or "off"): the debug mode runs the program in windowed mode (so you can read the console errors). It is recommended you run this mode the first time you try out the script. 
   * `pracSN` (default: 999): the subject number used for your "practice" runs that significantly shortens the experiment.
   *  `isi` in miliseconds (default: 1200): the number of ms that the dots will stay on the screen. This value will strongly depend on age, but in general 800 - 1200 ms will be fine for kids 3 - 10. 
   * `numberArray` array (default: [30,10;10,30;20,10;10,20;18,12;12,18;24,20;20,24]): the list of numbers/ratios that will be presented, separated by semicolons. For example [20,10;10,20] means that the participant will always see either 20 yellow and 10 blue or 10 yellow and 20 blue dots. *Make sure that there are no spaces between the commas or semicolons when you type in these values, as this will cause the line to not be read in properly*. 
   * `allowedVariability` in percent (default 40): the maximum percent that one dot can be different from the default size. Higher variability means more heterogenous sizes between the dots. In general, 20 - 50% is a good number. 
   * `defaultSizePercentScreen` in percent (default: 1.5): the default cumulative size of the dots in each set (percent of total used screen size is used to make the size scalable with different drawRect options). Typically this will range from 0.5 - 3.0, depending on the total number of dots. 
-  * `trialsPerBin' (default: 2): the number of fully balanced trials that will happen in the experiment. For example, if you have the default 6 ratios x 2 area congruency = 12 bins * 2 trialsPerBin = 24 trials total.
+  * `trialsPerBin` (default: 2): the number of fully balanced trials that will happen in the experiment. For example, if you have the default 6 ratios x 2 area congruency = 12 bins * 2 trialsPerBin = 24 trials total.
   * `color1rgb` and `color2rgb` in RGB values (defaults: [255,255,0] amd [0,0,255]: the colours for the two sets of dots.
   * `key1` and `key2` in char (default: 'f' and 'j'): keys used for answering in your task. *We do not recommend allowing kids younger than 8 to press their own keys*. Instead, they can tap the screen or vocalize the response. 
   * `character1` and `character2` (default: "spongebob" and "smurf"): the PNG files of the two kid-friendly characters associated with each set of dots. The script also provides 'bigbird' and 'grover'. You can feel free to use your own so long as they are transparent background PNG files.
@@ -26,6 +27,7 @@ To run the script as an experiment, you need to adjust the config.txt file, incl
  
 ## Advice for helping kids understand the task
 There is no method that works with every kid at every age. Three- and four-year-olds will be a tad confused at first, and eight-year-olds will be bored. But, in general, there are a few tips on helping kids understand the task:
+
 *  Start by introducing them to the two characters. Be excited! Tell them that each character has a box (wow! a box!). Point on the screen as you say whose box is whose (this helps in case they don't know both the characters or are colour-blind). Make it seem like these boxes will hold the greatest treasure they have ever seen! 
 * The simplest game is to have kids tell you which character has more dots (you can replace dots with marbles, or spots, or circles, or toys, or coasters, whatever). If they tell you that those are not dots but something else - go with it! 
 * If they clearly did not understand what to do, force-quit the program (q by default) and start again. Two exceptions: don't do this after they've done more than 5-10 trials, and don't quit more than once! Some kids just won't get it, and that's alright. It's not **that** good of a game after all. 
@@ -53,4 +55,4 @@ The script has four functions:
   * It outputs a boolean if the first pair overlaps with second two pairs. 
 
 ## If you need more than two sets of dots
-When working with children it is important to spatially distribute the dots. This makes it easier to identify which dot is which, helps kids understand the task, and allows us to test kids that may be colour-blind. As a result, it is not possible to add extra sets of dots into this script. If you absolutely need more sets, use the `ptbdotsaoi.m` script. 
+When working with children it is important to spatially distribute the dots. This makes it easier to identify which dot is which, helps kids understand the task, and allows us to test kids that may be colour-blind or don't know the colour words. As a result, it is not possible to add extra sets of dots into this script. If you absolutely need more sets, use the `ptbdotsaoi.m` script. 

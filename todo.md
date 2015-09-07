@@ -1,2 +1,1 @@
-- [ ] README for Display
-- [ ] README for Generator
+All done for now! 
