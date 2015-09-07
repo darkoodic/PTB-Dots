@@ -23,8 +23,4 @@ There are four different versions of the script:
 4. **PTB-Dots Kids** (`ptbdotskids.m`): A special version of the All-In-One script that customizes the display to make it easier to work with children between the ages of 3 - 10. Further information on this script is available in that folder's README.md file. 
 
 ## License
-<<<<<<< HEAD
 Code released under the <a href="http://opensource.org/licenses/MIT">MIT license</a>.
-=======
-Code released under the MIT license.
->>>>>>> master
